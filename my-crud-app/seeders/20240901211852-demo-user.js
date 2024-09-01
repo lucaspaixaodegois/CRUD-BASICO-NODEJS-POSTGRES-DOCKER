@@ -1,8 +1,11 @@
 'use strict';
 
+const bcrypt = require('bcrypt');
+
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    return queryInterface.bulkInsert('Users', [
+    const saltRounds = 10; // Define o número de rounds para o salt
+    const users = [
       {
         name: 'Ana Souza',
         email: 'ana.souza@example.com',
@@ -83,7 +86,14 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
-    ]);
+    ];
+
+    // Hashear as senhas antes de inserir no banco de dados
+    for (let user of users) {
+      user.password = await bcrypt.hash(user.password, saltRounds);
+    }
+
+    return queryInterface.bulkInsert('Users', users);
   },
 
   down: async (queryInterface, Sequelize) => {
